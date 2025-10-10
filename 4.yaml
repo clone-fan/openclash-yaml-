@@ -1,0 +1,457 @@
+# DNS防泄露版本
+# 不是必须请勿用，不懂不要随便更改DNS模块
+# 必读！！！
+# 注意规则在满足自己需求情况下，尽量做到精简，不要过度复杂，以免影响性能。
+# 跑裸核用户请自行去掉下方控制面板模块的注释。
+
+# 机场订阅
+proxy-providers:
+
+  订阅链接:
+    url: "订阅链接1"
+    type: http
+    interval: 86400
+    health-check:
+      enable: true
+      url: https://www.gstatic.com/generate_204
+      interval: 180
+    proxy: 直连 
+  
+# 节点信息
+proxies:
+  - {name: 直连, type: direct}
+  - {name: 拒绝, type: reject}
+
+# 全局配置 
+port: 7890
+socks-port: 7891
+redir-port: 7892
+mixed-port: 7893
+tproxy-port: 7894
+allow-lan: true
+bind-address: "*"
+ipv6: false
+unified-delay: true
+tcp-concurrent: true
+# interface-name: enp6s18
+log-level: warning
+find-process-mode: 'off'
+global-client-fingerprint: chrome
+keep-alive-idle: 600
+keep-alive-interval: 15
+profile:
+  store-selected: true
+  store-fake-ip: true
+
+# 为防止使用插件朋友遇到面板问题，我注释掉了此模块。
+# 跑裸核朋友自行删除注释即可，使用nikki仅内核的ui路径改为/etc/nikki/run/ui
+#external-controller: 0.0.0.0:9090
+#secret: ""
+#external-ui: "/etc/mihomo/ui"
+#external-ui-name: zashboard
+#external-ui-url: "https://github.com/Zephyruso/zashboard/archive/refs/heads/gh-pages.zip"
+
+# 嗅探
+sniffer:
+  enable: true
+  sniff:
+    HTTP:
+      ports: [80, 8080-8880]
+      override-destination: true
+    TLS:
+      ports: [443, 8443]
+    QUIC:
+      ports: [443, 8443]
+  force-domain:
+    - "+.v2ex.com"
+  skip-domain:
+    - "+.baidu.com"
+
+# 入站  
+tun:
+  enable: true
+  # system/gvisor/mixed
+  stack: mixed
+  dns-hijack: ["any:53", "tcp://any:53"]
+  #使用nikki，混入全部不修改的情况，开启接口指定为nikki
+  #使用仅内核自行修改下面三项为true
+  #device: nikki
+  auto-route: false
+  auto-redirect: false
+  auto-detect-interface: false
+
+
+
+# DNS模块
+dns:
+  enable: true
+  listen: 0.0.0.0:1053
+  ipv6: false
+  respect-rules: true
+  enhanced-mode: fake-ip
+  fake-ip-range: 28.0.0.1/8
+  fake-ip-filter-mode: blacklist
+  proxy-server-nameserver:
+    - https://223.5.5.5/dns-query
+  direct-nameserver:
+    - 223.5.5.5
+    - 119.29.29.29
+  nameserver:
+    - https://8.8.8.8/dns-query
+  nameserver-policy:
+    "rule-set:Private / Domain,China / Domain,Apple / Domain":
+      - 223.5.5.5
+      - 119.29.29.29
+  fake-ip-filter:
+    - "rule-set:Private / Domain,China / Domain,Apple / Domain"
+ 
+# ========================
+# 策略组定义
+# ========================
+default: &default
+  type: select
+  proxies:
+    - 直连
+    - 所有-故转
+    - 所有-手选
+    - 香港-故转
+    - 香港-手选
+    - 台湾-故转
+    - 日本-故转
+    - 新加坡-故转
+    - 新加坡-手选
+    - 美国-故转
+    - 其他-故转
+    - 拒绝
+
+proxy-groups:
+
+  # 业务分流组
+
+  - {name: 🌐默认代理, <<: *default}
+  - {name: 🐟漏网之鱼, <<: *default}  
+  - {name: 🌐国内直连, <<: *default}
+  - {name: 🚫Block, <<: *default}
+  - {name: 🎮游戏平台, <<: *default}
+  - {name: 🤖AI, <<: *default}
+  - {name: 🎥流媒体, <<: *default}
+  - {name: 👨🏿‍💻GitHub, <<: *default}
+  - {name: 🍀加密货币, <<: *default}
+  - {name: 🪟智能手机, <<: *default}
+  - {name: 🚀测试测速, <<: *default}
+  - {name: 📲Telegram, <<: *default}
+  - {name: 🛑成人网站, <<: *default}
+
+  # 所有组
+
+  - name: 所有-故转
+    type: fallback
+    interval: 180
+    lazy: false
+    proxies:
+      - 所有-手选
+      - 所有-智选
+  
+  - name: 所有-手选
+    type: select
+    include-all: true
+    filter: "^((?!(直连|拒绝)).)*$"
+
+  - name: 所有-智选
+    type: smart
+    include-all: true
+    policy-priority: ".*(香港|HK).*:1.5;.*(新加坡|狮城|SG|Singapore).*:1.8"
+    uselightgbm: true
+    collectdata: false
+    health-check: 
+      enable: true
+      url: https://www.gstatic.com/generate_204
+      interval: 60
+      tolerance: 2
+    strategy: sticky-sessions
+    interval: 180
+    filter: "^((?!(直连|拒绝)).)*$"
+
+  # 香港组
+
+  - name: 香港-故转
+    type: fallback
+    interval: 180
+    lazy: false
+    proxies:
+      - 香港-手选
+      - 香港-智选
+  
+  - name: 香港-手选
+    type: select
+    include-all: true
+    filter: "(?=.*(广港|香港|HK|Hong Kong|🇭🇰|HongKong)).*$"
+    
+  - name: 香港-智选
+    type: smart
+    include-all: true
+    policy-priority: ".*牛逼.*:0.8"
+    uselightgbm: true
+    collectdata: true
+    health-check: 
+      enable: true
+      url: https://www.gstatic.com/generate_204
+      interval: 60
+      tolerance: 2
+    strategy: sticky-sessions
+    interval: 180
+    filter: "(?=.*(广港|香港|HK|Hong Kong|🇭🇰|HongKong)).*$"
+ 
+  # 台湾组
+
+  - name: 台湾-故转
+    type: fallback
+    interval: 180
+    lazy: false
+    proxies:
+      - 台湾-手选
+      - 台湾-智选
+  - name: 台湾-手选
+    type: select
+    include-all: true
+    filter: "(?=.*(广台|台湾|台灣|TW|Tai Wan|🇹🇼|🇨🇳|TaiWan|Taiwan)).*$"
+  - name: 台湾-智选
+    type: smart
+    include-all: true
+    policy-priority: ".*牛逼.*:0.8"
+    uselightgbm: true
+    collectdata: true
+    health-check: 
+      enable: true
+      url: https://www.gstatic.com/generate_204
+      interval: 60
+      tolerance: 2
+    strategy: sticky-sessions
+    interval: 180
+    filter: "(?=.*(广台|台湾|台灣|TW|Tai Wan|🇹🇼|🇨🇳|TaiWan|Taiwan)).*$"
+
+  # 日本组
+
+  - name: 日本-故转
+    type: fallback
+    interval: 180
+    lazy: false
+    proxies:
+      - 日本-手选
+      - 日本-智选
+  - name: 日本-手选
+    type: select
+    include-all: true
+    filter: "(?=.*(广日|日本|JP|川日|东京|大阪|泉日|埼玉|沪日|深日|🇯🇵|Japan)).*$"
+  - name: 日本-智选
+    type: smart
+    include-all: true
+    policy-priority: ".*牛逼.*:0.8"
+    uselightgbm: true
+    collectdata: true
+    health-check: 
+      enable: true
+      url: https://www.gstatic.com/generate_204
+      interval: 60
+      tolerance: 2
+    strategy: sticky-sessions
+    interval: 180
+    filter: "(?=.*(广日|日本|JP|川日|东京|大阪|泉日|埼玉|沪日|深日|🇯🇵|Japan)).*$"
+
+  # 新加坡组
+
+  - name: 新加坡-故转
+    type: fallback
+    interval: 180
+    lazy: false
+    proxies:
+      - 新加坡-手选
+      - 新加坡-智选
+  - name: 新加坡-手选
+    type: select
+    include-all: true
+    filter: "(?=.*(广新|新加坡|SG|坡|狮城|🇸🇬|Singapore)).*$"
+  - name: 新加坡-智选
+    type: smart
+    include-all: true
+    policy-priority: ".*牛逼.*:0.8"
+    uselightgbm: true
+    collectdata: true
+    health-check: 
+      enable: true
+      url: https://www.gstatic.com/generate_204
+      interval: 60
+      tolerance: 2
+    strategy: sticky-sessions
+    interval: 180
+    filter: "(?=.*(广新|新加坡|SG|坡|狮城|🇸🇬|Singapore)).*$"
+
+  # 美国组
+
+  - name: 美国-故转
+    type: fallback
+    interval: 180
+    lazy: false
+    proxies:
+      - 美国-手选
+      - 美国-智选
+  - name: 美国-手选
+    type: select
+    include-all: true
+    filter: "(?=.*(广美|美|US|纽约|波特兰|达拉斯|俄勒|凤凰城|费利蒙|拉斯|洛杉|圣何塞|圣克拉|西雅|芝加|🇺🇸|United States)).*$"
+  - name: 美国-智选
+    type: smart
+    include-all: true
+    policy-priority: ".*牛逼.*:0.8"
+    uselightgbm: true
+    collectdata: true
+    health-check: 
+      enable: true
+      url: https://www.gstatic.com/generate_204
+      interval: 60
+      tolerance: 2
+    strategy: sticky-sessions
+    interval: 180
+    filter: "(?=.*(广美|美|US|纽约|波特兰|达拉斯|俄勒|凤凰城|费利蒙|拉斯|洛杉|圣何塞|圣克拉|西雅|芝加|🇺🇸|United States)).*$"
+
+
+  # 其他组
+  
+  - name: 其他-故转
+    type: fallback
+    interval: 180
+    lazy: false
+    proxies:
+      - 其他-手选
+      - 其他-智选
+  - name: 其他-手选
+    type: select
+    include-all: true
+    filter: "^((?!(直连|拒绝|广港|香港|HK|Hong Kong|🇭🇰|HongKong|广台|台湾|台灣|TW|Tai Wan|🇹🇼|🇨🇳|TaiWan|Taiwan|广日|日本|JP|川日|东京|大阪|泉日|埼玉|沪日|深日|🇯🇵|Japan|广新|新加坡|SG|坡|狮城|🇸🇬|Singapore|广美|美|US|纽约|波特兰|达拉斯|俄勒|凤凰城|费利蒙|拉斯|洛杉|圣何塞|圣克拉|西雅|芝加|🇺🇸|United States)).)*$"
+
+  - name: 其他-智选
+    type: smart
+    include-all: true
+    policy-priority: ".*牛逼.*:0.8"
+    uselightgbm: true
+    collectdata: true
+    health-check: 
+      enable: true
+      url: https://www.gstatic.com/generate_204
+      interval: 60
+      tolerance: 2
+    strategy: sticky-sessions
+    interval: 180
+    filter: "^((?!(直连|拒绝|广港|香港|HK|Hong Kong|🇭🇰|HongKong|广台|台湾|台灣|TW|Tai Wan|🇹🇼|🇨🇳|TaiWan|Taiwan|广日|日本|JP|川日|东京|大阪|泉日|埼玉|沪日|深日|🇯🇵|Japan|广新|新加坡|SG|坡|狮城|🇸🇬|Singapore|广美|美|US|纽约|波特兰|达拉斯|俄勒|凤凰城|费利蒙|拉斯|洛杉|圣何塞|圣克拉|西雅|芝加|🇺🇸|United States)).)*$"
+
+# ========================
+# 规则引擎（rules）
+# ========================
+rules:
+
+  - RULE-SET,TEST / Domain, 🚀测试测速
+  - RULE-SET,Block / Domain, 🚫Block  
+  - RULE-SET,GitHub / Domain, 👨🏿‍💻GitHub    
+  - RULE-SET,ChatGPT / Domain, 🤖AI
+  - RULE-SET,Claude / Domain, 🤖AI
+  - RULE-SET,Copilot / Domain, 🤖AI
+  - RULE-SET,Gemini / Domain, 🤖AI
+  - RULE-SET,Groq / Domain, 🤖AI
+  - RULE-SET,Grok / Domain, 🤖AI
+  - RULE-SET,Meta AI / Domain, 🤖AI
+  - RULE-SET,Perplexity / Domain, 🤖AI
+  - RULE-SET,Microsoft / Domain, 🪟智能手机
+  - RULE-SET,Apple / Domain, 🪟智能手机
+  - RULE-SET,Apple-CN / Domain, 🪟智能手机
+  - RULE-SET,OKX / Domain, 🍀加密货币
+  - RULE-SET,Bybit / Domain, 🍀加密货币
+  - RULE-SET,Binance / Domain, 🍀加密货币
+  - RULE-SET,TikTok / Domain, 🎥流媒体
+  - RULE-SET,Netflix / Domain, 🎥流媒体
+  - RULE-SET,Netflix / IP, 🎥流媒体,no-resolve
+  - RULE-SET,Disney / Domain, 🎥流媒体
+  - RULE-SET,Amazon / Domain, 🎥流媒体
+  - RULE-SET,HBO / Domain, 🎥流媒体
+  - RULE-SET,Crunchyroll / Domain, 🎥流媒体
+  - RULE-SET,Popcorn / Domain, 🎥流媒体
+  - RULE-SET,Spotify / Domain, 🎥流媒体
+  - RULE-SET,Youtube / Domain, 🎥流媒体
+  - RULE-SET,Steam / Domain, 🎮游戏平台
+  - RULE-SET,SteamCN / Domain, 🎮游戏平台
+  - RULE-SET,Epic / Domain, 🎮游戏平台
+  - RULE-SET,EA / Domain, 🎮游戏平台
+  - RULE-SET,Blizzard / Domain, 🎮游戏平台
+  - RULE-SET,UBI / Domain, 🎮游戏平台
+  - RULE-SET,PlayStation / Domain, 🎮游戏平台
+  - RULE-SET,Nintend / Domain, 🎮游戏平台
+  - RULE-SET,Nvidia / Domain, 🪟智能手机
+  - RULE-SET,Proxy / Domain, 🌐默认代理
+  - RULE-SET,Globe / Domain, 🌐默认代理
+  - RULE-SET,Direct / Domain, 🌐国内直连
+  - RULE-SET,China / Domain, 🌐国内直连
+  - RULE-SET,China / IP, 🌐国内直连,no-resolve
+  - RULE-SET,Private / Domain, 🌐国内直连
+  - RULE-SET,telegram_domain, 📲Telegram
+  - RULE-SET,NSFW, 🛑成人网站
+  - MATCH,🐟漏网之鱼
+
+# ========================
+# 规则集提供者
+# ========================
+rule-anchor:
+  ip: &ip {type: http, interval: 86400, behavior: ipcidr, format: mrs}
+  domain: &domain {type: http, interval: 86400, behavior: domain, format: mrs}
+  class: &class {type: http, interval: 86400, behavior: classical, format: text}
+
+rule-providers:
+  NSFW: {  <<: *domain, url: "https://gh-proxy.com/github.com/tanmoumou252/NSFWruleset/blob/main/NSFW.yaml" }
+  TEST / Domain: {<<: *class, url: "https://gh-proxy.com/raw.githubusercontent.com/liandu2024/clash/refs/heads/main/list/Check.list"}
+  ChatGPT / Domain: {<<: *domain, url: "https://gh-proxy.com/github.com/metacubex/meta-rules-dat/raw/refs/heads/meta/geo/geosite/openai.mrs"}
+  Claude / Domain: {<<: *class, url: "https://gh-proxy.com/raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Claude/Claude.list"}
+  Meta AI / Domain: {<<: *class, url: "https://gh-proxy.com/raw.githubusercontent.com/liandu2024/clash/refs/heads/main/list/MetaAi.list"}
+  Perplexity / Domain: {<<: *domain, url: "https://gh-proxy.com/github.com/metacubex/meta-rules-dat/raw/refs/heads/meta/geo/geosite/perplexity.mrs"}
+  Copilot / Domain: {<<: *class, url: "https://gh-proxy.com/raw.githubusercontent.com/liandu2024/clash/refs/heads/main/list/Copilot.list"}
+  Gemini / Domain: {<<: *class, url: "https://gh-proxy.com/raw.githubusercontent.com/liandu2024/clash/refs/heads/main/list/Gemini.list"}
+  GitHub / Domain: {<<: *domain, url: "https://gh-proxy.com/github.com/metacubex/meta-rules-dat/raw/refs/heads/meta/geo/geosite/github.mrs"}
+  Amazon / Domain: {<<: *domain, url: "https://gh-proxy.com/github.com/metacubex/meta-rules-dat/raw/refs/heads/meta/geo/geosite/amazon.mrs"}
+  Apple-CN / Domain: {<<: *domain, url: "https://gh-proxy.com/github.com/metacubex/meta-rules-dat/raw/refs/heads/meta/geo/geosite/apple-cn.mrs"}
+  Apple / Domain: {<<: *domain, url: "https://gh-proxy.com/github.com/metacubex/meta-rules-dat/raw/refs/heads/meta/geo/geosite/apple.mrs"} 
+  Microsoft / Domain: {<<: *domain, url: "https://gh-proxy.com/github.com/metacubex/meta-rules-dat/raw/refs/heads/meta/geo/geosite/microsoft.mrs"}
+  OKX / Domain: {<<: *domain, url: "https://gh-proxy.com/github.com/metacubex/meta-rules-dat/raw/refs/heads/meta/geo/geosite/okx.mrs"}
+  Bybit / Domain: {<<: *domain, url: "https://gh-proxy.com/github.com/metacubex/meta-rules-dat/raw/refs/heads/meta/geo/geosite/bybit.mrs"}
+  Binance / Domain: {<<: *domain, url: "https://gh-proxy.com/github.com/metacubex/meta-rules-dat/raw/refs/heads/meta/geo/geosite/binance.mrs"}
+  TikTok / Domain: {<<: *domain, url: "https://gh-proxy.com/github.com/metacubex/meta-rules-dat/raw/refs/heads/meta/geo/geosite/tiktok.mrs"}
+  Netflix / Domain: {<<: *domain, url: "https://gh-proxy.com/github.com/metacubex/meta-rules-dat/raw/refs/heads/meta/geo/geosite/netflix.mrs"}
+  Netflix / IP: {<<: *ip, url: "https://gh-proxy.com/github.com/metacubex/meta-rules-dat/raw/refs/heads/meta/geo/geoip/netflix.mrs"}
+  Disney / Domain: {<<: *domain, url: "https://gh-proxy.com/github.com/metacubex/meta-rules-dat/raw/refs/heads/meta/geo/geosite/disney.mrs"}
+  HBO / Domain: {<<: *domain, url: "https://gh-proxy.com/github.com/metacubex/meta-rules-dat/raw/refs/heads/meta/geo/geosite/hbo.mrs"}
+  Spotify / Domain: {<<: *domain, url: "https://gh-proxy.com/github.com/metacubex/meta-rules-dat/raw/refs/heads/meta/geo/geosite/spotify.mrs"}
+  Youtube / Domain: {<<: *domain, url: "https://gh-proxy.com/github.com/metacubex/meta-rules-dat/raw/refs/heads/meta/geo/geosite/youtube.mrs"}
+  telegram_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/telegram.mrs"}
+  telegram_ip: { <<: *ip, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/telegram.mrs"}
+  Steam / Domain: {<<: *domain, url: "https://gh-proxy.com/github.com/blackmatrix7/ios_rule_script/blob/master/rule/Clash/Steam/Steam.list"}
+  SteamCN / Domain: {<<: *domain, url: "https://gh-proxy.com/github.com/blackmatrix7/ios_rule_script/blob/master/rule/Clash/SteamCN/SteamCN.list"}
+  Epic / Domain: {<<: *class, url: "https://gh-proxy.com/raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Epic/Epic.list"}
+  EA / Domain: {<<: *class, url: "https://gh-proxy.com/raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/EA/EA.list"}
+  Blizzard / Domain: {<<: *class, url: "https://gh-proxy.com/raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Blizzard/Blizzard.list"}
+  UBI / Domain: {<<: *class, url: "https://gh-proxy.com/raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/UBI/UBI.list"}
+  PlayStation / Domain: {<<: *class, url: "https://gh-proxy.com/raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/PlayStation/PlayStation.list"}
+  Nintend / Domain: {<<: *class, url: "https://gh-proxy.com/raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Nintendo/Nintendo.list"}
+  Proxy / Domain: {<<: *class, url: "https://gh-proxy.com/raw.githubusercontent.com/liandu2024/clash/refs/heads/main/list/Proxy.list"}
+  Globe / Domain: {<<: *class, url: "https://gh-proxy.com/raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Global/Global.list"} 
+  Block / Domain: {<<: *class, url: "https://gh-proxy.com/raw.githubusercontent.com/liandu2024/clash/refs/heads/main/list/Block.list"}
+  Nvidia / Domain: {<<: *class, url: "https://gh-proxy.com/raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Nvidia/Nvidia.list"}
+  Crunchyroll / Domain: {<<: *class, url: "https://gh-proxy.com/raw.githubusercontent.com/liandu2024/clash/refs/heads/main/list/Crunchyroll.list"}
+  Groq / Domain: {<<: *domain, url: "https://gh-proxy.com/github.com/metacubex/meta-rules-dat/raw/refs/heads/meta/geo/geosite/groq.mrs"}
+  Grok / Domain: {<<: *class, url: "https://gh-proxy.com/raw.githubusercontent.com/liandu2024/clash/refs/heads/main/list/Grok.list"}
+  Popcorn / Domain: {<<: *class, url: "https://gh-proxy.com/raw.githubusercontent.com/liandu2024/clash/refs/heads/main/list/Popcorn.list"}
+  Direct / Domain: {<<: *class, url: "https://gh-proxy.com/raw.githubusercontent.com/liandu2024/clash/refs/heads/main/list/Direct.list"}
+  Private / Domain: {<<: *domain, url: "https://gh-proxy.com/github.com/metacubex/meta-rules-dat/raw/refs/heads/meta/geo/geosite/private.mrs"}
+  China / Domain: {<<: *domain, url: "https://gh-proxy.com/github.com/blackmatrix7/ios_rule_script/blob/master/rule/Clash/ChinaMax/ChinaMax.list"}
+  China / IP: {<<: *ip, url: "https://gh-proxy.com/github.com/blackmatrix7/ios_rule_script/blob/master/rule/Clash/ChinaMax/ChinaMax_IP.yaml"}
+  Twitter / Domain: {<<: *domain, url: "https://gh-proxy.com/github.com/metacubex/meta-rules-dat/raw/refs/heads/meta/geo/geosite/x.mrs"}
+  WhatsApp / Domain: {<<: *class, url: "https://gh-proxy.com/raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Whatsapp/Whatsapp.list"}
+  Facebook / Domain: {<<: *domain, url: "https://gh-proxy.com/github.com/metacubex/meta-rules-dat/raw/refs/heads/meta/geo/geosite/facebook.mrs"}
+  Google / Domain: {<<: *domain, url: "https://gh-proxy.com/github.com/metacubex/meta-rules-dat/raw/refs/heads/meta/geo/geosite/google.mrs"}  
+  Google / IP: {<<: *ip, url: "https://gh-proxy.com/github.com/metacubex/meta-rules-dat/raw/refs/heads/meta/geo/geoip/google.mrs"}
+  GateFireWall / Domain: {<<: *domain, url: "https://gh-proxy.com/github.com/metacubex/meta-rules-dat/raw/refs/heads/meta/geo/geosite/gfw.mrs"}
