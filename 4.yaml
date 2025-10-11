@@ -18,26 +18,6 @@ proxy-providers:
       interval: 180
     proxy: 直连 
 
-  机场订阅2:
-    url: "机场订阅1"
-    type: http
-    interval: 86400
-    health-check:
-      enable: true
-      url: https://www.gstatic.com/generate_204
-      interval: 180
-    proxy: 直连  
-    
-  机场订阅3:
-    url: "机场订阅3"
-    type: http
-    interval: 86400
-    health-check:
-      enable: true
-      url: https://www.gstatic.com/generate_204
-      interval: 180
-    proxy: 直连 
-
 proxies:
 - { name: 直连, type: direct }
 - { name: 拒绝, type: reject }
@@ -141,6 +121,7 @@ default: &default
   type: select
   proxies:
   - 直连
+  - 所有地区-智选
   - 亚太地区-故转
   - 亚太地区-手选
   - 欧美地区-故转
@@ -165,6 +146,21 @@ proxy-groups:
   - { name: 🚀测试测速, <<: *default }
   - { name: 📲海外社交, <<: *default }
   - { name: 🛑NSFW, <<: *default }
+
+# 所有地区组
+  - name: 所有地区-智选
+    type: smart
+    include-all: true
+    uselightgbm: true
+    collectdata: false
+    health-check: 
+      enable: true
+      url: https://www.gstatic.com/generate_204
+      interval: 60
+      tolerance: 2
+    strategy: sticky-sessions
+    interval: 180
+    filter: "^((?!(直连|拒绝)).)*$"
 
 # 亚太地区组
 
@@ -266,14 +262,7 @@ rules:
   - RULE-SET,GitHub / Domain, 👨🏿‍💻科技公司
   - RULE-SET,Google / Domain, 👨🏿‍💻科技公司
   - RULE-SET,Google / IP, 👨🏿‍💻科技公司
-  - RULE-SET,ChatGPT / Domain, 🤖AI
-  - RULE-SET,Claude / Domain, 🤖AI
-  - RULE-SET,Copilot / Domain, 🤖AI
-  - RULE-SET,Gemini / Domain, 🤖AI
-  - RULE-SET,Groq / Domain, 🤖AI
-  - RULE-SET,Grok / Domain, 🤖AI
-  - RULE-SET,Meta AI / Domain, 🤖AI
-  - RULE-SET,Perplexity / Domain, 🤖AI
+  - RULE-SET,AI / Domain, 🤖AI
   - RULE-SET,Microsoft / Domain, 🪟智能手机
   - RULE-SET,Apple / Domain, 🪟智能手机
   - RULE-SET,Apple-CN / Domain, 🪟智能手机
@@ -324,14 +313,7 @@ rule-anchor:
 rule-providers:
 
   # AI 服务
-  ChatGPT / Domain: { <<: *domain, url: "https://gh-proxy.com/github.com/metacubex/meta-rules-dat/raw/refs/heads/meta/geo/geosite/openai.mrs" }
-  Claude / Domain: { <<: *class, url: "https://gh-proxy.com/raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Claude/Claude.list" }
-  Meta AI / Domain: { <<: *domain, url: "https://gh-proxy.com/github.com/metacubex/meta-rules-dat/raw/refs/heads/meta/geo/geosite/meta.mrs" }
-  Perplexity / Domain: { <<: *domain, url: "https://gh-proxy.com/github.com/metacubex/meta-rules-dat/raw/refs/heads/meta/geo/geosite/perplexity.mrs" }
-  Copilot / Domain: { <<: *domain, url: "https://gh-proxy.com/github.com/metacubex/meta-rules-dat/raw/refs/heads/meta/geo/geosite/github.mrs" }
-  Gemini / Domain: { <<: *domain, url: "https://gh-proxy.com/github.com/metacubex/meta-rules-dat/raw/refs/heads/meta/geo/geosite/google.mrs" }
-  Groq / Domain: { <<: *domain, url: "https://gh-proxy.com/github.com/metacubex/meta-rules-dat/raw/refs/heads/meta/geo/geosite/groq.mrs" }
-  Grok / Domain: { <<: *class, url: "https://gh-proxy.com/raw.githubusercontent.com/liandu2024/clash/refs/heads/main/list/Grok.list" }
+  AI / Domain: { <<: *domain, url: "https://gh-proxy.com/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/category-ai-!cn.mrs" }
 
   # 科技公司
   GitHub / Domain: { <<: *domain, url: "https://gh-proxy.com/github.com/metacubex/meta-rules-dat/raw/refs/heads/meta/geo/geosite/github.mrs" }
