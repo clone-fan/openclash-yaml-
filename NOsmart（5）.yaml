@@ -138,21 +138,21 @@ proxy-groups:
   - {name: 🌐 所有地区-手选, type: select, include-all: true}
 
 # 亚太地区组
-  - {name: 🔯 亚太地区-故转, type: fallback, interval: 180, lazy: false, proxies: [♻️ 亚太地区-智选, 🌐 亚太地区-手选]}
+  - {name: 🔯 亚太地区-故转, type: fallback, interval: 180, lazy: false, proxies: [🌐 亚太地区-手选, ♻️ 亚太地区-智选]}
   - {name: ♻️ 亚太地区-智选, type: url-test, include-all: true, tolerance: 20, interval: 300, 
       filter: "(?=.*(广港|香港|HK|Hong Kong|🇭🇰|HongKong|广台|台湾|台灣|TW|Tai Wan|🇹🇼|🇨🇳|TaiWan|Taiwan|广日|日本|JP|川日|东京|大阪|泉日|埼玉|沪日|深日|🇯🇵|Japan|广新|新加坡|SG|坡|狮城|🇸🇬|Singapore|韩国|KR|Korea|🇰🇷|Australia|澳洲|🇦🇺|Sydney|悉尼|Melbourne|墨尔本)).*$"}
   - {name: 🌐 亚太地区-手选, type: select, include-all: true, 
       filter: "(?=.*(广港|香港|HK|Hong Kong|🇭🇰|HongKong|广台|台湾|台灣|TW|Tai Wan|🇹🇼|🇨🇳|TaiWan|Taiwan|广日|日本|JP|川日|东京|大阪|泉日|埼玉|沪日|深日|🇯🇵|Japan|广新|新加坡|SG|坡|狮城|🇸🇬|Singapore|韩国|KR|Korea|🇰🇷|Australia|澳洲|🇦🇺|Sydney|悉尼|Melbourne|墨尔本)).*$"}
 
 # 欧美地区组
-  - {name: 🔯 欧美地区-故转, type: fallback, interval: 180, lazy: false, proxies: [♻️ 欧美地区-智选, 🌐 欧美地区-手选]}
+  - {name: 🔯 欧美地区-故转, type: fallback, interval: 180, lazy: false, proxies: [🌐 欧美地区-手选, ♻️ 欧美地区-智选]}
   - {name: ♻️ 欧美地区-智选, type: url-test, include-all: true, tolerance: 20, interval: 300, 
       filter: "(?=.*(US|United States|美国|🇺🇸|纽约|洛杉矶|芝加哥|伦敦|英国|UK|Germany|德国|France|法国|瑞士|荷兰|Canada|加拿大|Europe|欧洲)).*$"}
   - {name: 🌐 欧美地区-手选, type: select, include-all: true, 
       filter: "(?=.*(US|United States|美国|🇺🇸|纽约|洛杉矶|芝加哥|伦敦|英国|UK|Germany|德国|France|法国|瑞士|荷兰|Canada|加拿大|Europe|欧洲)).*$"}
 
 # 其他地区组  
-  - {name: 🔯 其他地区-故转, type: fallback, interval: 180, lazy: false, proxies: [♻️ 其他地区-智选, 🌐 其他地区-手选]}
+  - {name: 🔯 其他地区-故转, type: fallback, interval: 180, lazy: false, proxies: [🌐 其他地区-手选, ♻️ 其他地区-智选]}
   - {name: ♻️ 其他地区-智选, type: url-test, include-all: true, tolerance: 20, interval: 300, 
       filter: "^((?!(广港|香港|HK|Hong Kong|🇭🇰|HongKong|广台|台湾|台灣|TW|Tai Wan|🇹🇼|🇨🇳|TaiWan|Taiwan|广日|日本|JP|川日|东京|大阪|泉日|埼玉|沪日|深日|🇯🇵|Japan|广新|新加坡|SG|坡|狮城|🇸🇬|Singapore|韩国|KR|Korea|🇰🇷|Australia|澳洲|🇦🇺|Sydney|悉尼|Melbourne|墨尔本|US|United States|美国|🇺🇸|纽约|洛杉矶|芝加哥|伦敦|英国|UK|Germany|德国|France|法国|瑞士|荷兰|Canada|加拿大|Europe|欧洲)).)*$"}
   - {name: 🌐 其他地区-手选, type: select, include-all: true, 
