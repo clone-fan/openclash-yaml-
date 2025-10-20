@@ -168,14 +168,15 @@ rules:
   - RULE-SET,Private / Domain, 直连
   - RULE-SET,China / Domain, 直连
   - RULE-SET,China / IP, 直连,no-resolve
+  - RULE-SET,GameDownload / Domain, 直连
+  - RULE-SET,GameDownloadCN / Domain, 直连
 
   # 拒绝
   - RULE-SET,Adobe / Domain, 🚫 Adobe
 
   # 游戏平台
   - RULE-SET,Game / Domain, 🎮 游戏平台
-  - RULE-SET,GameDownload / Domain, 🎮 游戏平台
-  - RULE-SET,GameDownloadCN / Domain, 🎮 游戏平台
+
 
   # 流媒体平台
   - RULE-SET,Netflix / Domain, 🎥 流媒体平台
@@ -190,9 +191,9 @@ rules:
   - RULE-SET,TikTok / Domain, 📲 海外社交
   - RULE-SET,GitHub / Domain, 📲 海外社交
   - RULE-SET,Google / Domain, 📲 海外社交
-  - RULE-SET,Google / IP, 📲 海外社交
+  - RULE-SET,Google / IP, 📲 海外社交,no-resolve
   - RULE-SET,Telegram / Domain, 📲 海外社交
-  - RULE-SET,Telegram / IP, 📲 海外社交
+  - RULE-SET,Telegram / IP, 📲 海外社交,no-resolve
   - RULE-SET,Twitter / Domain, 📲 海外社交
   - RULE-SET,Facebook / Domain, 📲 海外社交
   - RULE-SET,WhatsApp / Domain, 📲 海外社交
@@ -239,10 +240,13 @@ rule-providers:
   # 拒绝
   Adobe / Domain: { <<: *yaml, url: "https://gh-proxy.com/github.com/blackmatrix7/ios_rule_script/blob/master/rule/Clash/Adobe/Adobe.yaml" }
 
-  # 游戏平台
-  Game / Domain: { <<: *yaml, url: "https://gh-proxy.com/github.com/blackmatrix7/ios_rule_script/blob/master/rule/Clash/Game/Game.yaml" }
+  # 游戏平台CN
   GameDownload / Domain: { <<: *yaml, url: "https://gh-proxy.com/github.com/blackmatrix7/ios_rule_script/blob/master/rule/Clash/Game/GameDownload/GameDownload.yaml" }
   GameDownloadCN / Domain: { <<: *yaml, url: "https://gh-proxy.com/github.com/blackmatrix7/ios_rule_script/blob/master/rule/Clash/Game/GameDownloadCN/GameDownloadCN.yaml" }
+
+  # 游戏平台
+  Game / Domain: { <<: *yaml, url: "https://gh-proxy.com/github.com/blackmatrix7/ios_rule_script/blob/master/rule/Clash/Game/Game.yaml" }
+  
 
   # 流媒体平台
   Netflix / Domain: { <<: *domain, url: "https://gh-proxy.com/github.com/metacubex/meta-rules-dat/raw/refs/heads/meta/geo/geosite/netflix.mrs" }
