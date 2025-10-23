@@ -1,14 +1,15 @@
 
 payload:
 
-  - DOMAIN-SUFFIX,akamai,PROXY,force-ipv4
-  - DOMAIN-SUFFIX,dyncdn,PROXY,force-ipv4
-  - DOMAIN-SUFFIX,fc2,PROXY,force-ipv4
-  - DOMAIN-SUFFIX,hentai,PROXY,force-ipv4
-  - DOMAIN-SUFFIX,jav,PROXY,force-ipv4
-  - DOMAIN-SUFFIX,hanime1.me,PROXY,force-ipv4
-  - DOMAIN-SUFFIX,hanime.tv,PROXY,force-ipv4
-  - DOMAIN-SUFFIX,njav.tv,PROXY,force-ipv4
-  - DOMAIN-SUFFIX,javxx.com,PROXY,force-ipv4
-
-  - DOMAIN-SUFFIX,theporndude.com,PROXY,force-ipv4
+  - DOMAIN-KEYWORD,akamai,PROXY,force-ipv4
+  - DOMAIN-KEYWORD,dyncdn,PROXY,force-ipv4
+  - DOMAIN-KEYWORD,fc2,PROXY,force-ipv4
+  - DOMAIN-KEYWORD,hentai,PROXY,force-ipv4
+  - DOMAIN-KEYWORD,jav,PROXY,force-ipv4
+  - DOMAIN-KEYWORD,hanime1,PROXY,force-ipv4
+  - DOMAIN-KEYWORD,hanime,PROXY,force-ipv4
+  - DOMAIN-KEYWORD,hanimeone,PROXY,force-ipv4
+  - DOMAIN-KEYWORD,njav,PROXY,force-ipv4
+  - DOMAIN-KEYWORD,javxx.com,PROXY,force-ipv4
+  - DOMAIN-KEYWORD,theporndude.com,PROXY,force-ipv4
+  - DOMAIN-KEYWORD,missav,PROXY,force-ipv4
