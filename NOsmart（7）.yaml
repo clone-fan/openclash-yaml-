@@ -203,6 +203,7 @@ rules:
   - RULE-SET,Private / Domain, 直连
   - RULE-SET,Private / IP, 直连,no-resolve
   - RULE-SET,Adobe / Domain, 🚫 禁止访问
+  - RULE-SET,Apple-CN, 直连
   - RULE-SET,GameDownloadCN / Domain, 直连
   - DOMAIN-SUFFIX,qichiyu.com,🚀 国外网站
   - RULE-SET,Proxylite, 🚀 国外网站
@@ -293,7 +294,7 @@ rule-providers:
   # 🎮 游戏平台
   GameDownload / Domain: { <<: *yaml, url: "https://gh-proxy.com/github.com/blackmatrix7/ios_rule_script/blob/master/rule/Clash/Game/GameDownload/GameDownload.yaml" }
   GameDownloadCN / Domain: { <<: *yaml, url: "https://gh-proxy.com/github.com/blackmatrix7/ios_rule_script/blob/master/rule/Clash/Game/GameDownloadCN/GameDownloadCN.yaml" }
-  Games / Domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/category-games-!cn.mrs"}
+  Games / Domain: { <<: *domain, url: "https://gh-proxy.com/raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/category-games-!cn.mrs"}
 
   # 🎥 海外流媒体
   Netflix / Domain: { <<: *domain, url: "https://gh-proxy.com/github.com/metacubex/meta-rules-dat/raw/refs/heads/meta/geo/geosite/netflix.mrs" }
@@ -347,6 +348,7 @@ rule-providers:
   # 🍎 Apple 服务
   Apple / Domain: { <<: *domain, url: "https://gh-proxy.com/github.com/metacubex/meta-rules-dat/raw/refs/heads/meta/geo/geosite/apple.mrs" }
   Apple-CN / Domain: { <<: *domain, url: "https://gh-proxy.com/github.com/metacubex/meta-rules-dat/raw/refs/heads/meta/geo/geosite/apple-cn.mrs" }
+  Apple / IP: {<<: *ip, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo-lite/geoip/apple.mrs"}
 
   # 默认规则（别动顺序）
   Geolocation-!cn: { <<: *domain, url: "https://gh-proxy.com/raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/geolocation-!cn.mrs"}
