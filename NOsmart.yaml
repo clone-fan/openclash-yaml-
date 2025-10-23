@@ -16,13 +16,12 @@ proxy-providers:
       interval: 300
     proxy: 直连
 
+# 节点信息
 proxies:
-  - { name: 直连, type: direct }
-  - { name: 拒绝, type: reject }
+  - {name: 直连, type: direct}
+  - {name: 拒绝, type: reject}
 
-# ========================
-# 主要端口设置
-# ========================
+# 全局配置 
 port: 7890
 socks-port: 7891
 redir-port: 7892
@@ -30,7 +29,7 @@ mixed-port: 7893
 tproxy-port: 7894
 allow-lan: true
 bind-address: "*"
-ipv6: false
+ipv6: true
 unified-delay: true
 tcp-concurrent: true
 # interface-name: enp6s18
@@ -89,21 +88,26 @@ dns:
   enhanced-mode: fake-ip
   fake-ip-range: 28.0.0.1/8
   fake-ip-filter-mode: blacklist
+  fake-ip-filter:
+    - "rule-set:Private / Domain,China / Domain,Apple / Domain"
+    - "+.msftconnecttest.com"
+    - "+.msftncsi.com"
+    - "time.*.com"
+    - "+.market.xiaomi.com"
   proxy-server-nameserver:
     - 119.29.29.29
-  direct-nameserver:
+  default-nameserver:
     - 223.5.5.5
     - 119.29.29.29
   nameserver:
-    - https://8.8.8.8/dns-query
+    - 223.5.5.5
+    - 119.29.29.29
   nameserver-policy:
     "rule-set:Private / Domain,China / Domain,Apple / Domain":
       - 223.5.5.5
       - 119.29.29.29
-  fake-ip-filter:
-    - "rule-set:Private / Domain,China / Domain,Apple / Domain"
-
-# 出站策略，根据自己情况调整每个策略里分组排序，增删都可以，比如把美国自动放到第一个，比如删除香港故转，注意别漏掉表情逗号等。
+ 
+ # 出站策略，根据自己情况调整每个策略里分组排序，增删都可以，比如把美国自动放到第一个，比如删除香港故转，注意别漏掉表情逗号等。
 # 如果相应分组没有筛选到对应的国家，请根据自己节点名字调整筛选关键字。
 # 没有再使用锚点，是考虑很多新手修改难度，这样新手修改某个分组更容易些。
 
