@@ -10,6 +10,7 @@ payload:
   - DOMAIN-KEYWORD,hanime,PROXY,force-ipv4
   - DOMAIN-KEYWORD,hanimeone,PROXY,force-ipv4
   - DOMAIN-KEYWORD,njav,PROXY,force-ipv4
-  - DOMAIN-KEYWORD,javxx.com,PROXY,force-ipv4
-  - DOMAIN-KEYWORD,theporndude.com,PROXY,force-ipv4
+  - DOMAIN-KEYWORD,javxx,PROXY,force-ipv4
+  - DOMAIN-KEYWORD,theporndude,PROXY,force-ipv4
   - DOMAIN-KEYWORD,missav,PROXY,force-ipv4
+
