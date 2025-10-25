@@ -338,7 +338,7 @@ rule-providers:
   Crypto-Domain: { <<: *class, url: "https://gh-proxy.com/raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Surge/Crypto/Crypto.list" }
 
   # 🛑 NSFW
-  NSFW-Domain: { <<: *yaml, url: "https://gh-proxy.com/raw.githubusercontent.com/clone-fan/openclash-yaml-/main/Nfsw.yaml" }
+  NSFW-Domain: { <<: *yaml, url: "https://gh-proxy.com/raw.githubusercontent.com/clone-fan/openclash-yaml-/main/rule/NFSW.yaml" }
 
   # 🪟 微软服务
   Microsoft-Domain: { <<: *domain, url: "https://gh-proxy.com/github.com/metacubex/meta-rules-dat/raw/refs/heads/meta/geo/geosite/microsoft.mrs" }
