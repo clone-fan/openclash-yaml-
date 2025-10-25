@@ -1,0 +1,15 @@
+
+payload:
+
+  - DOMAIN-KEYWORD,akamai,PROXY,force-ipv4
+  - DOMAIN-KEYWORD,dyncdn,PROXY,force-ipv4
+  - DOMAIN-KEYWORD,fc2,PROXY,force-ipv4
+  - DOMAIN-KEYWORD,hentai,PROXY,force-ipv4
+  - DOMAIN-KEYWORD,jav,PROXY,force-ipv4
+  - DOMAIN-KEYWORD,hanime1,PROXY,force-ipv4
+  - DOMAIN-KEYWORD,hanime,PROXY,force-ipv4
+  - DOMAIN-KEYWORD,hanimeone,PROXY,force-ipv4
+  - DOMAIN-KEYWORD,njav,PROXY,force-ipv4
+  - DOMAIN-KEYWORD,javxx.com,PROXY,force-ipv4
+  - DOMAIN-KEYWORD,theporndude.com,PROXY,force-ipv4
+  - DOMAIN-KEYWORD,missav,PROXY,force-ipv4
