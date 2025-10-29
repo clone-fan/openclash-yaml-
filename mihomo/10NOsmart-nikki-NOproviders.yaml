@@ -29,7 +29,7 @@ mixed-port: 7893
 tproxy-port: 7894
 allow-lan: true
 bind-address: "*"
-ipv6: true
+ipv6: false
 unified-delay: true
 tcp-concurrent: true
 # interface-name: enp6s18
@@ -45,11 +45,11 @@ profile:
 # 为防止使用插件朋友遇到面板问题，我注释掉了此模块。
 # 跑裸核朋友自行删除注释即可，使用nikki仅内核的ui路径改为/etc/nikki/run/ui
 
-#external-controller: 0.0.0.0:9090
-#secret: ""
-#external-ui: "/etc/mihomo/ui"
-#external-ui-name: zashboard
-#external-ui-url: "https://gh-proxy.com/github.com/Zephyruso/zashboard/archive/refs/heads/gh-pages.zip"
+external-controller: 0.0.0.0:9090
+secret: ""
+external-ui: "/etc/nikki/run/ui"
+external-ui-name: zashboard
+external-ui-url: "https://gh-proxy.com/github.com/Zephyruso/zashboard/archive/refs/heads/gh-pages.zip"
 
 # 嗅探
 sniffer:
@@ -76,9 +76,9 @@ tun:
   #使用nikki，混入全部不修改的情况，开启接口指定为nikki
   #使用仅内核自行修改下面三项为true
   device: nikki
-  auto-route: false
-  auto-redirect: false
-  auto-detect-interface: false
+  auto-route: true
+  auto-redirect: true
+  auto-detect-interface: true
 
 # DNS模块
 dns:
@@ -96,17 +96,17 @@ dns:
     - "time.*.com"
     - "+.market.xiaomi.com"
   proxy-server-nameserver:
-    - 119.29.29.29
+     - 119.29.29.29
   default-nameserver:
     - 223.5.5.5
     - 119.29.29.29
   nameserver:
-    - 223.5.5.5
-    - 119.29.29.29
+    - https://8.8.8.8/dns-query
   nameserver-policy:
     "rule-set:Private-Domain,China-Domain":
       - 223.5.5.5
       - 119.29.29.29
+
  
 # 出站策略，根据自己情况调整每个策略里分组排序，增删都可以，比如把美国自动放到第一个，比如删除香港故转，注意别漏掉表情逗号等。
 # 如果相应分组没有筛选到对应的国家，请根据自己节点名字调整筛选关键字。
@@ -338,7 +338,7 @@ rule-providers:
   Crypto-Domain: { <<: *class, url: "https://gh-proxy.com/raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Surge/Crypto/Crypto.list" }
 
   # 🛑 NSFW
-  NSFW-Domain: { <<: *yaml, url: "https://gh-proxy.com/raw.githubusercontent.com/clone-fan/openclash-yaml-/main/rule/NFSW.yaml" }
+  NSFW-Domain: { <<: *yaml, url: "https://gh-proxy.com/raw.githubusercontent.com/clone-fan/openclash-yaml-/main/rule/NSFW.list" }
 
   # 🪟 微软服务
   Microsoft-Domain: { <<: *domain, url: "https://gh-proxy.com/github.com/metacubex/meta-rules-dat/raw/refs/heads/meta/geo/geosite/microsoft.mrs" }
