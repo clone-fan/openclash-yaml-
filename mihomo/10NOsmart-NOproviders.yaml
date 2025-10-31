@@ -29,7 +29,7 @@ mixed-port: 7893
 tproxy-port: 7894
 allow-lan: true
 bind-address: "*"
-ipv6: false
+ipv6: true
 unified-delay: true
 tcp-concurrent: true
 # interface-name: enp6s18
@@ -197,7 +197,7 @@ rules:
   - RULE-SET,Adobe-Domain, 🚫 禁止访问
   - RULE-SET,Apple-CN-Domain, 直连
   - RULE-SET,GameDownloadCN-Domain, 直连
-  - DOMAIN-SUFFIX,qichiyu.com,🚀 国外网站
+  - DOMAIN-SUFFIX,qichiyu.com, 🚀 国外网站
   - RULE-SET,Proxylite, 🚀 国外网站
 
   # 🎮 游戏平台
