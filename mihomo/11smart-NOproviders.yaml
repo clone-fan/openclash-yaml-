@@ -90,7 +90,7 @@ dns:
   fake-ip-range: 28.0.0.1/8
   fake-ip-filter-mode: blacklist
   fake-ip-filter:
-    - "rule-set:Private-Domain,China-Domain"
+    - "rule-set:Private-Domain,China-Domain,Apple-Domain"
     - "+.msftconnecttest.com"
     - "+.msftncsi.com"
     - "time.*.com"
@@ -104,7 +104,7 @@ dns:
     - 223.5.5.5
     - 119.29.29.29
   nameserver-policy:
-    "rule-set:Private-Domain,China-Domain":
+    "rule-set:Private-Domain,China-Domain,Apple-Domain":
       - 223.5.5.5
       - 119.29.29.29
  
@@ -287,6 +287,7 @@ rule-anchor:
   domain: &domain { type: http, interval: 86400, behavior: domain, format: mrs }
   class: &class { type: http, interval: 86400, behavior: classical, format: text }
   yaml: &yaml { type: http, interval: 86400, behavior: classical, format: yaml }
+  adblock_tpl: &adblock_tpl { type: http, interval: 86400, behavior: domain, format: yaml }
 
 rule-providers:
   # 默认规则（勿动）
@@ -298,7 +299,7 @@ rule-providers:
   Adobe-Domain: { <<: *yaml, url: "https://gh-proxy.com/raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Adobe/Adobe.yaml" }
 
   # 🚫 广告拦截
-  AdBlock-Domain: { <<: *yaml, url: "https://gh-proxy.com/raw.githubusercontent.com/REIJI007/AdBlock_Rule_For_Clash/main/adblock_reject.yaml" }
+  AdBlock-Domain: { <<: *adblock_tpl, url: "https://gh-proxy.com/raw.githubusercontent.com/REIJI007/AdBlock_Rule_For_Clash/main/adblock_reject.yaml"}
 
   # 🎮 游戏平台
   GameDownload-Domain: { <<: *yaml, url: "https://gh-proxy.com/raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Game/GameDownload/GameDownload.yaml" }
