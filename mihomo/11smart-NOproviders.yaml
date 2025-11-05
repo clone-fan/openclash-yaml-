@@ -95,14 +95,21 @@ dns:
     - "+.msftncsi.com"
     - "time.*.com"
     - "+.market.xiaomi.com"
+    - "+.aliyundrive.com"
+    - "+.alipan.com"
+    - "+.aliyuncs.com"
+    - "+.alipay.com"
+    - "+.taobao.com"
+    - "+.tmall.com"
+    - "+.dingtalk.com"
+    - "+.aliyun.com"
   proxy-server-nameserver:
-    - 119.29.29.29
+    - https://223.5.5.5/dns-query
   default-nameserver:
-    - 223.5.5.5
-    - 119.29.29.29
+      - 223.5.5.5
+      - 119.29.29.29
   nameserver:
-    - 223.5.5.5
-    - 119.29.29.29
+    - https://8.8.8.8/dns-query
   nameserver-policy:
     "rule-set:Private-Domain,China-Domain,Apple-Domain":
       - 223.5.5.5
@@ -148,44 +155,44 @@ proxy-groups:
 
 # 地区组
   # 香港
-  - {name: 🔯 🇭🇰 香港-智转, type: smart, proxies: [🌐 🇭🇰 香港-手选, ♻️ 🇭🇰 香港-智选], policy-priority: ".*🇭🇰 香港-手选.*:1.8", health-check: {enable: true, url: "https://www.gstatic.com/generate_204", interval: 60, tolerance: 2}}
+  - {name: 🔯 🇭🇰 香港-智转, type: smart, proxies: [🌐 🇭🇰 香港-手选, ♻️ 🇭🇰 香港-智选], policy-priority: ".*🇭🇰 香港-手选.*:1.8", health-check: {enable: true, url: "https://cp.cloudflare.com/generate_204", interval: 60, tolerance: 1}}
   - {name: 🌐 🇭🇰 香港-手选, type: select, include-all: true, filter: "(?=.*(香港|HK|Hong Kong|HongKong)).*$"}
   # 日本
-  - {name: 🔯 🇯🇵 日本-智转, type: smart, proxies: [🌐 🇯🇵 日本-手选, ♻️ 🇯🇵 日本-智选], policy-priority: ".*🇯🇵 日本-手选.*:1.8", health-check: {enable: true, url: "https://www.gstatic.com/generate_204", interval: 60, tolerance: 2}}
+  - {name: 🔯 🇯🇵 日本-智转, type: smart, proxies: [🌐 🇯🇵 日本-手选, ♻️ 🇯🇵 日本-智选], policy-priority: ".*🇯🇵 日本-手选.*:1.8", health-check: {enable: true, url: "https://cp.cloudflare.com/generate_204", interval: 60, tolerance: 1}}
   - {name: 🌐 🇯🇵 日本-手选, type: select, include-all: true, filter: "(?=.*(日本|JP|Japan|Tokyo|Osaka|Kyoto|Nagoya|Fukuoka|东京|大阪|京都|名古屋|福冈)).*$"}
   # 新加坡
-  - {name: 🔯 🇸🇬 新加坡-智转, type: smart, proxies: [🌐 🇸🇬 新加坡-手选, ♻️ 🇸🇬 新加坡-智选], policy-priority: ".*🇸🇬 新加坡-手选.*:1.8", health-check: {enable: true, url: "https://www.gstatic.com/generate_204", interval: 60, tolerance: 2}}
+  - {name: 🔯 🇸🇬 新加坡-智转, type: smart, proxies: [🌐 🇸🇬 新加坡-手选, ♻️ 🇸🇬 新加坡-智选], policy-priority: ".*🇸🇬 新加坡-手选.*:1.8", health-check: {enable: true, url: "https://cp.cloudflare.com/generate_204", interval: 60, tolerance: 1}}
   - {name: 🌐 🇸🇬 新加坡-手选, type: select, include-all: true, filter: "(?=.*(新加坡|SG|Singapore|狮城|坡)).*$"}
   # 台湾
-  - {name: 🔯 🇹🇼 台湾-智转, type: smart, proxies: [🌐 🇹🇼 台湾-手选, ♻️ 🇹🇼 台湾-智选], policy-priority: ".*🇹🇼 台湾-手选.*:1.8", health-check: {enable: true, url: "https://www.gstatic.com/generate_204", interval: 60, tolerance: 2}}
+  - {name: 🔯 🇹🇼 台湾-智转, type: smart, proxies: [🌐 🇹🇼 台湾-手选, ♻️ 🇹🇼 台湾-智选], policy-priority: ".*🇹🇼 台湾-手选.*:1.8", health-check: {enable: true, url: "https://cp.cloudflare.com/generate_204", interval: 60, tolerance: 1}}
   - {name: 🌐 🇹🇼 台湾-手选, type: select, include-all: true, filter: "(?=.*(台湾|台灣|TW|Taiwan|TaiWan|Taipei|台北|Kaohsiung|高雄)).*$"}
   # 美国
-  - {name: 🔯 🇺🇸 美国-智转, type: smart, proxies: [🌐 🇺🇸 美国-手选, ♻️ 🇺🇸 美国-智选], policy-priority: ".*🇺🇸 美国-手选.*:1.8", health-check: {enable: true, url: "https://www.gstatic.com/generate_204", interval: 60, tolerance: 2}}
+  - {name: 🔯 🇺🇸 美国-智转, type: smart, proxies: [🌐 🇺🇸 美国-手选, ♻️ 🇺🇸 美国-智选], policy-priority: ".*🇺🇸 美国-手选.*:1.8", health-check: {enable: true, url: "https://cp.cloudflare.com/generate_204", interval: 60, tolerance: 1}}
   - {name: 🌐 🇺🇸 美国-手选, type: select, include-all: true, filter: "(?=.*(美国|US|USA|United States|America|🇺🇸|纽约|New York|洛杉矶|Los Angeles|LA|芝加哥|Chicago|旧金山|San Francisco|SF|硅谷|Silicon Valley|圣何塞|San Jose|达拉斯|Dallas|西雅图|Seattle|华盛顿|Washington|波士顿|Boston|迈阿密|Miami|休斯顿|Houston|圣地亚哥|San Diego|费城|Philadelphia|亚特兰大|Atlanta|奥斯汀|Austin)).*$"}
 
 # 地球组
   - {name: 🌐 所有-手选, type: select, include-all: true}
-  - {name: 🔯 亚太-智转, type: fallback, proxies: [♻️ 亚太-智选, 🌐 亚太-手选], health-check: {enable: true, url: "https://www.gstatic.com/generate_204", interval: 300}}
+  - {name: 🔯 亚太-智转, type: fallback, proxies: [♻️ 亚太-智选, 🌐 亚太-手选], health-check: {enable: true, url: "https://cp.cloudflare.com/generate_204", interval: 300}}
   - {name: 🌐 亚太-手选, type: select, include-all: true, filter: "(?=.*(香港|HK|Hong Kong|HongKong|日本|JP|Japan|Tokyo|Osaka|Kyoto|Nagoya|Fukuoka|新加坡|SG|Singapore|狮城|坡|台湾|TW|Taiwan|TaiWan|台灣|Taipei|台北|Kaohsiung|高雄|韩国|KR|Korea|Seoul|首尔|Busan|釜山|澳洲|AU|Australia|Sydney|Melbourne|Perth)).*$"}
-  - {name: 🔯 欧美-智转, type: fallback, proxies: [♻️ 欧美-智选, 🌐 欧美-手选], health-check: {enable: true, url: "https://www.gstatic.com/generate_204", interval: 300}}
+  - {name: 🔯 欧美-智转, type: fallback, proxies: [♻️ 欧美-智选, 🌐 欧美-手选], health-check: {enable: true, url: "https://cp.cloudflare.com/generate_204", interval: 300}}
   - {name: 🌐 欧美-手选, type: select, include-all: true, filter: "(?=.*(美国|US|USA|United States|America|纽约|New York|洛杉矶|Los Angeles|LA|芝加哥|Chicago|旧金山|San Francisco|SF|硅谷|Silicon Valley|圣何塞|San Jose|达拉斯|Dallas|西雅图|Seattle|华盛顿|Washington|波士顿|Boston|迈阿密|Miami|休斯顿|Houston|英国|UK|United Kingdom|London|伦敦|Manchester|曼彻斯特|德国|DE|Germany|Berlin|法兰克福|Frankfurt|法国|FR|France|Paris|Lyon|里昂|加拿大|CA|Canada|Toronto|Montreal|Vancouver|温哥华|Europe|欧洲)).*$"}
 # 智选组
   - {name: ♻️ 🇭🇰 香港-智选, type: smart, include-all: true, uselightgbm: true, collectdata: true,
-      health-check: {enable: true, url: "https://www.gstatic.com/generate_204", interval: 60, tolerance: 2},
+      health-check: {enable: true, url: "https://cp.cloudflare.com/generate_204", interval: 60, tolerance: 1},
       filter: "(?=.*(香港|HK|Hong Kong|HongKong)).*$"}
   - {name: ♻️ 🇯🇵 日本-智选, type: smart, include-all: true, uselightgbm: true, collectdata: true,
-      health-check: {enable: true, url: "https://www.gstatic.com/generate_204", interval: 60, tolerance: 2},
+      health-check: {enable: true, url: "https://cp.cloudflare.com/generate_204", interval: 60, tolerance: 1},
       filter: "(?=.*(日本|JP|Japan|Tokyo|Osaka|Kyoto|Nagoya|Fukuoka|东京|大阪|京都|名古屋|福冈)).*$"}
   - {name: ♻️ 🇸🇬 新加坡-智选, type: smart, include-all: true, uselightgbm: true, collectdata: true,
-      health-check: {enable: true, url: "https://www.gstatic.com/generate_204", interval: 60, tolerance: 2},
+      health-check: {enable: true, url: "https://cp.cloudflare.com/generate_204", interval: 60, tolerance: 1},
       filter: "(?=.*(新加坡|SG|Singapore|狮城|坡)).*$"}
   - {name: ♻️ 🇹🇼 台湾-智选, type: smart, include-all: true, uselightgbm: true, collectdata: true,
-      health-check: {enable: true, url: "https://www.gstatic.com/generate_204", interval: 60, tolerance: 2},
+      health-check: {enable: true, url: "https://cp.cloudflare.com/generate_204", interval: 60, tolerance: 1},
       filter: "(?=.*(台湾|台灣|TW|Taiwan|TaiWan|Taipei|台北|Kaohsiung|高雄)).*$"}
   - {name: ♻️ 🇺🇸 美国-智选, type: smart, include-all: true, uselightgbm: true, collectdata: true,
-      health-check: {enable: true, url: "https://www.gstatic.com/generate_204", interval: 60, tolerance: 2},
+      health-check: {enable: true, url: "https://cp.cloudflare.com/generate_204", interval: 60, tolerance: 1},
       filter: "(?=.*(美国|US|USA|United States|America|🇺🇸|纽约|New York|洛杉矶|Los Angeles|LA|芝加哥|Chicago|旧金山|San Francisco|SF|硅谷|Silicon Valley|圣何塞|San Jose|达拉斯|Dallas|西雅图|Seattle|华盛顿|Washington|波士顿|Boston|迈阿密|Miami|休斯顿|Houston|圣地亚哥|San Diego|费城|Philadelphia|亚特兰大|Atlanta|奥斯汀|Austin)).*$"}
-  - {name: ♻️ 所有-智选, type: smart, include-all: true, uselightgbm: true, collectdata: true, health-check: {enable: true, url: "https://www.gstatic.com/generate_204", interval: 60, tolerance: 2}, policy-priority: ".*(HK|香港|SG|新加坡).*:1.8", filter: "^((?!(直连|拒绝)).)*$"}
+  - {name: ♻️ 所有-智选, type: smart, include-all: true, uselightgbm: true, collectdata: true, health-check: {enable: true, url: "https://cp.cloudflare.com/generate_204", interval: 60, tolerance: 1}, policy-priority: ".*(HK|香港|SG|新加坡).*:1.8", filter: "^((?!(直连|拒绝)).)*$"}
   - {name: ♻️ 亚太-智选, type: smart, include-all: true, collectdata: true, 
       filter: "(?=.*(香港|HK|Hong Kong|HongKong|日本|JP|Japan|Tokyo|Osaka|Kyoto|Nagoya|Fukuoka|新加坡|SG|Singapore|狮城|坡|台湾|TW|Taiwan|TaiWan|台灣|Taipei|台北|Kaohsiung|高雄|韩国|KR|Korea|Seoul|首尔|Busan|釜山|澳洲|AU|Australia|Sydney|Melbourne|Perth)).*$",
       policy-priority: ".*香港|HK|Hong Kong|HongKong.*:1.6, .*新加坡|SG|Singapore|狮城|坡.*:1.5"}
