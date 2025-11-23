@@ -1,0 +1,440 @@
+﻿# DNS防泄露版本
+# 不是必须请勿用，不懂不要随便更改DNS模块
+# 必读！！！
+# 注意规则在满足自己需求情况下，尽量做到精简，不要过度复杂，以免影响性能。
+# 跑裸核用户请自行去掉下方控制面板模块的注释。
+
+# 机场订阅
+proxy-providers:
+  Airport1:
+    url: "机场订阅填到这里，两端引号不要去掉，不要填写到下方链接里去！！"
+    type: http
+    interval: 86400
+    health-check:
+      enable: true
+      url: https://www.gstatic.com/generate_204
+      interval: 300
+    proxy: 直连
+      #additional-prefix: "前缀 |"
+      #additional-suffix: "| 后缀"
+
+
+# 节点信息 
+proxies:
+  - {name: 直连, type: direct}
+  - {name: 拒绝, type: reject}
+
+# 全局配置 
+port: 7890
+socks-port: 7891
+redir-port: 7892
+mixed-port: 7893
+tproxy-port: 7894
+allow-lan: true
+bind-address: "*"
+ipv6: true
+unified-delay: true
+tcp-concurrent: true
+# interface-name: enp6s18
+log-level: warning
+find-process-mode: 'off'
+global-client-fingerprint: chrome
+keep-alive-idle: 600
+keep-alive-interval: 15
+profile:
+  store-selected: true
+  store-fake-ip: true
+
+# 为防止使用插件朋友遇到面板问题，我注释掉了此模块。
+# 跑裸核朋友自行删除注释即可，使用nikki仅内核的ui路径改为/etc/nikki/run/ui
+
+#external-controller: 0.0.0.0:9090
+#secret: ""
+#external-ui: "/etc/mihomo/ui"
+#external-ui-name: zashboard
+#external-ui-url: "https://gh-proxy.com/github.com/Zephyruso/zashboard/archive/refs/heads/gh-pages.zip"
+
+# 嗅探
+sniffer:
+  enable: true
+  sniff:
+    HTTP:
+      ports: [80, 8080-8880]
+      override-destination: true
+    TLS:
+      ports: [443, 8443]
+    QUIC:
+      ports: [443, 8443]
+  force-domain:
+    - "+.v2ex.com"
+  skip-domain:
+    - "+.baidu.com"
+
+# 入站  
+tun:
+  enable: true
+  # system/gvisor/mixed
+  stack: mixed
+  dns-hijack: ["any:53", "tcp://any:53"]
+  #使用nikki，混入全部不修改的情况，开启接口指定为nikki
+  #使用仅内核自行修改下面三项为true
+  #device: nikki
+  auto-route: false
+  auto-redirect: false
+  auto-detect-interface: false
+
+# DNS模块
+dns:
+  enable: true
+  listen: 0.0.0.0:1053
+  ipv6: true
+  respect-rules: true
+  enhanced-mode: fake-ip
+  fake-ip-range: 28.0.0.1/8
+  fake-ip-filter-mode: blacklist
+  fake-ip-filter:
+    - "rule-set:Private-Domain,China-Domain,Apple-Domain"
+    - "+.msftconnecttest.com"
+    - "+.msftncsi.com"
+    - "time.*.com"
+    - "+.market.xiaomi.com"
+    - "+.aliyundrive.com"
+    - "+.alipan.com"
+    - "+.aliyuncs.com"
+    - "+.alipay.com"
+    - "+.taobao.com"
+    - "+.tmall.com"
+    - "+.dingtalk.com"
+    - "+.aliyun.com"
+  proxy-server-nameserver:
+    - https://223.5.5.5/dns-query
+  default-nameserver:
+      - 223.5.5.5
+      - 119.29.29.29
+  nameserver:
+    - https://8.8.8.8/dns-query
+  nameserver-policy:
+    "rule-set:Private-Domain,China-Domain,Apple-Domain":
+      - 223.5.5.5
+      - 119.29.29.29
+ 
+# 出站策略，根据自己情况调整每个策略里分组排序，增删都可以，比如把美国自动放到第一个，比如删除香港故转，注意别漏掉表情逗号等。
+# 如果相应分组没有筛选到对应的国家，请根据自己节点名字调整筛选关键字。
+# 没有再使用锚点，是考虑很多新手修改难度，这样新手修改某个分组更容易些。
+
+# 媒体优先模板：适用于 YouTube/海外流媒体/emby 等，优先日/新/美线路，其次全局
+MediaRouting: &F1
+  type: select
+  proxies:
+    - 所有-智选
+    - 所有-手选
+    - 香港-智转
+    - 新加坡-智转
+    - 日本-智转
+    - 美国-智转
+
+# 通用业务分流模板：适用于 Google/GitHub/社交/国外网站/漏网之鱼 等
+GeneralRouting: &F2
+  type: select
+  proxies:
+    - 所有-智选
+    - 所有-手选
+    - 香港-智转
+    - 日本-智转
+    - 新加坡-智转
+    - 台湾-智转
+    - 美国-智转
+    - 亚太-智转
+    - 欧美-智转
+
+# 直连拒绝模板：适用于需要直连或拒绝的模板
+blackRouting: &F3
+  type: select
+  proxies:
+    - 拒绝
+    - 直连
+    - 所有-智选
+    - 所有-手选
+
+
+# 地区组通用锚点
+# 智转锚点
+smart: &S1
+  type: smart
+  health-check: {enable: true, url: "https://cp.cloudflare.com/generate_204", interval: 60, tolerance: 500, timeout: 3, lazy: false}
+  auto-fallback: true
+  auto-recover: true
+
+# 智选锚点
+smart2: &S2
+  type: smart
+  include-all: true
+  uselightgbm: true
+  collectdata: false
+  health-check: {enable: true, url: "https://cp.cloudflare.com/generate_204", interval: 60, tolerance: 300, timeout: 3, lazy: false}
+
+proxy-groups:
+# 全局组
+  - {name: 所有-智选, <<: *S1, policy-priority: ".*(HK|香港|SG|新加坡).*:2.0", proxies: [香港-智选, 新加坡-智选, 日本-智选, 台湾-智选, 美国-智选, 亚太-智选, 欧美-智选], 
+      icon: "https://gh-proxy.com/raw.githubusercontent.com/clone-fan/openclash-yaml-/main/icon/Region/diqiu.png"}
+  - {name: 所有-手选, type: select, include-all: true, filter: "^((?!(直连|拒绝|剩余|重置|套餐|http)).)*$", 
+      icon: "https://gh-proxy.com/raw.githubusercontent.com/clone-fan/openclash-yaml-/main/icon/Region/diqiu.png"}
+
+# 业务分流组
+  - {name: 国外网站, <<: *F2, icon: "https://gh-proxy.com/raw.githubusercontent.com/clone-fan/openclash-yaml-/main/icon/Business/select.png"}
+  - {name: 漏网之鱼, <<: *F3, icon: "https://gh-proxy.com/raw.githubusercontent.com/clone-fan/openclash-yaml-/main/icon/Business/Globefish.png"}
+  - {name: 游戏平台, <<: *F1, icon: "https://gh-proxy.com/raw.githubusercontent.com/clone-fan/openclash-yaml-/main/icon/Business/game.png"}
+  - {name: 海外流媒体, <<: *F1, icon: "https://gh-proxy.com/raw.githubusercontent.com/clone-fan/openclash-yaml-/main/icon/Business/netflix.png"}
+  - {name: emby影视, <<: *F1, icon: "https://gh-proxy.com/raw.githubusercontent.com/clone-fan/openclash-yaml-/main/icon/Business/emby.png"}
+  - {name: TikTok, <<: *F1, icon: "https://gh-proxy.com/raw.githubusercontent.com/clone-fan/openclash-yaml-/main/icon/Business/douyin.png"}
+  - {name: YouTube, <<: *F1, icon: "https://gh-proxy.com/raw.githubusercontent.com/clone-fan/openclash-yaml-/main/icon/Business/youtube.png"}
+  - {name: Google, <<: *F2, icon: "https://gh-proxy.com/raw.githubusercontent.com/clone-fan/openclash-yaml-/main/icon/Business/google.png"}
+  - {name: 海外社交, <<: *F2, icon: "https://gh-proxy.com/raw.githubusercontent.com/clone-fan/openclash-yaml-/main/icon/Business/telegram.png"}
+  - {name: 海外购物, <<: *F1, icon: "https://gh-proxy.com/raw.githubusercontent.com/clone-fan/openclash-yaml-/main/icon/Business/amazon.png"}
+  - {name: 智能AI, <<: *F1, icon: "https://gh-proxy.com/raw.githubusercontent.com/clone-fan/openclash-yaml-/main/icon/Business/ai.png"}
+  - {name: GitHub, <<: *F2, icon: "https://gh-proxy.com/raw.githubusercontent.com/clone-fan/openclash-yaml-/main/icon/Business/github.png"}
+  - {name: 加密货币, <<: *F2, icon: "https://gh-proxy.com/raw.githubusercontent.com/clone-fan/openclash-yaml-/main/icon/Business/paypal.png"}
+  - {name: NSFW, <<: *F2, icon: "https://gh-proxy.com/raw.githubusercontent.com/clone-fan/openclash-yaml-/main/icon/Business/NSFW.png"}
+  - {name: 微软服务, <<: *F3, icon: "https://gh-proxy.com/raw.githubusercontent.com/clone-fan/openclash-yaml-/main/icon/Business/microsoft.png"}
+  - {name: Apple 服务, <<: *F3, icon: "https://gh-proxy.com/raw.githubusercontent.com/clone-fan/openclash-yaml-/main/icon/Business/apple.png"}
+  - {name: Adobe服务,  <<: *F3,  icon: "https://gh-proxy.com/raw.githubusercontent.com/clone-fan/openclash-yaml-/main/icon/Business/adobe.png"}
+  - {name: 广告拦截,  <<: *F3,  icon: "https://gh-proxy.com/raw.githubusercontent.com/clone-fan/openclash-yaml-/main/icon/Business/adblock.png"}
+
+# 地区组
+  # 香港
+  - {name: 香港-智转, <<: *S1, proxies: [香港-手选, 香港-智选], policy-priority: ".*香港-手选.*:2.0", 
+      icon: "https://gh-proxy.com/raw.githubusercontent.com/clone-fan/openclash-yaml-/main/icon/Region/HK.png"}
+  - {name: 香港-手选, type: select, include-all: true, filter: "(?=.*(香港|HK|Hong Kong|HongKong)).*$", 
+      icon: "https://gh-proxy.com/raw.githubusercontent.com/clone-fan/openclash-yaml-/main/icon/Region/HK.png"}
+
+  # 日本
+  - {name: 日本-智转, <<: *S1, proxies: [日本-手选, 日本-智选], policy-priority: ".*日本-手选.*:2.0", 
+      icon: "https://gh-proxy.com/raw.githubusercontent.com/clone-fan/openclash-yaml-/main/icon/Region/JP.png"}
+  - {name: 日本-手选, type: select, include-all: true, filter: "(?=.*(日本|JP|Japan|Tokyo)).*$", 
+      icon: "https://gh-proxy.com/raw.githubusercontent.com/clone-fan/openclash-yaml-/main/icon/Region/JP.png"}
+
+  # 新加坡
+  - {name: 新加坡-智转, <<: *S1, proxies: [新加坡-手选, 新加坡-智选], policy-priority: ".*新加坡-手选.*:2.0", 
+      icon: "https://gh-proxy.com/raw.githubusercontent.com/clone-fan/openclash-yaml-/main/icon/Region/SG.png"}
+  - {name: 新加坡-手选, type: select, include-all: true, filter: "(?=.*(新加坡|SG|Singapore|狮城|坡)).*$", 
+      icon: "https://gh-proxy.com/raw.githubusercontent.com/clone-fan/openclash-yaml-/main/icon/Region/SG.png"}
+
+  # 台湾
+  - {name: 台湾-智转, <<: *S1, proxies: [台湾-手选, 台湾-智选], policy-priority: ".*台湾-手选.*:2.0", 
+      icon: "https://gh-proxy.com/raw.githubusercontent.com/clone-fan/openclash-yaml-/main/icon/Region/TW.png"}
+  - {name: 台湾-手选, type: select, include-all: true, filter: "(?=.*(台湾|台灣|TW|Taiwan)).*$", 
+      icon: "https://gh-proxy.com/raw.githubusercontent.com/clone-fan/openclash-yaml-/main/icon/Region/TW.png"}
+
+  # 美国
+  - {name: 美国-智转, <<: *S1, proxies: [美国-手选, 美国-智选], policy-priority: ".*美国-手选.*:2.0", 
+      icon: "https://gh-proxy.com/raw.githubusercontent.com/clone-fan/openclash-yaml-/main/icon/Region/US.png"}
+  - {name: 美国-手选, type: select, include-all: true, filter: "(?=.*(美国|US|USA|United States)).*$", 
+      icon: "https://gh-proxy.com/raw.githubusercontent.com/clone-fan/openclash-yaml-/main/icon/Region/US.png"}
+
+# 地球组
+
+  - {name: 亚太-智转, type: fallback, proxies: [亚太-智选, 亚太-手选], 
+       health-check: {enable: true, url: "https://cp.cloudflare.com/generate_204", interval: 120, tolerance: 200}, max-failed-times: 2, 
+      icon: "https://gh-proxy.com/raw.githubusercontent.com/clone-fan/openclash-yaml-/main/icon/Region/yatai.png"}
+  - {name: 亚太-手选, type: select, include-all: true, filter: "(?=.*(香港|HK|日本|JP|新加坡|SG|台湾|TW|韩国|KR|澳洲|AU)).*$", 
+      icon: "https://gh-proxy.com/raw.githubusercontent.com/clone-fan/openclash-yaml-/main/icon/Region/yatai.png"}
+
+  - {name: 欧美-智转, type: fallback, proxies: [欧美-智选, 欧美-手选], 
+      health-check: {enable: true, url: "https://cp.cloudflare.com/generate_204", interval: 120, tolerance: 200}, max-failed-times: 2, 
+      icon: "https://gh-proxy.com/raw.githubusercontent.com/clone-fan/openclash-yaml-/main/icon/Region/oumei.png"}
+  - {name: 欧美-手选, type: select, include-all: true, filter: "(?=.*(US|美国|UK|英国|DE|德国|FR|法国)).*$", 
+      icon: "https://gh-proxy.com/raw.githubusercontent.com/clone-fan/openclash-yaml-/main/icon/Region/oumei.png"}
+
+# 智选组
+  - {name: 香港-智选, <<: *S2, filter: "(?=.*(香港|HK|Hong Kong|HongKong)).*$", 
+      icon: "https://gh-proxy.com/raw.githubusercontent.com/clone-fan/openclash-yaml-/main/icon/Region/HK.png"}
+  - {name: 日本-智选, <<: *S2, filter: "(?=.*(日本|JP|Japan|Tokyo)).*$", 
+      icon: "https://gh-proxy.com/raw.githubusercontent.com/clone-fan/openclash-yaml-/main/icon/Region/JP.png"}
+  - {name: 新加坡-智选, <<: *S2, filter: "(?=.*(新加坡|SG|Singapore|狮城|坡)).*$", 
+      icon: "https://gh-proxy.com/raw.githubusercontent.com/clone-fan/openclash-yaml-/main/icon/Region/SG.png"}
+  - {name: 台湾-智选, <<: *S2, filter: "(?=.*(台湾|台灣|TW|Taiwan)).*$", 
+      icon: "https://gh-proxy.com/raw.githubusercontent.com/clone-fan/openclash-yaml-/main/icon/Region/TW.png"}
+  - {name: 美国-智选, <<: *S2, filter: "(?=.*(美国|US|USA|United States)).*$", 
+      icon: "https://gh-proxy.com/raw.githubusercontent.com/clone-fan/openclash-yaml-/main/icon/Region/US.png"}
+  - {name: 亚太-智选, <<: *S2, policy-priority: ".*(HK|香港|SG|新加坡).*:2.0", filter: "(?=.*(香港|HK|日本|JP|新加坡|SG|台湾|TW|韩国|KR|澳洲|AU)).*$", 
+      icon: "https://gh-proxy.com/raw.githubusercontent.com/clone-fan/openclash-yaml-/main/icon/Region/yatai.png"}
+  - {name: 欧美-智选, <<: *S2, policy-priority: ".*(US|美国|UK|英国).*:2.0", filter: "(?=.*(US|美国|UK|英国|DE|德国|FR|法国)).*$", 
+      icon: "https://gh-proxy.com/raw.githubusercontent.com/clone-fan/openclash-yaml-/main/icon/Region/oumei.png"}
+
+# ========================
+# 规则引擎（rules）
+# ========================
+rules:
+  # 默认规则（别动顺序）
+  - RULE-SET,Private-Domain, 直连
+  - RULE-SET,Private-IP, 直连
+  - RULE-SET,Adobe-Domain, Adobe服务
+  - RULE-SET,AdBlock-Domain, 广告拦截
+  - RULE-SET,Apple-CN-Domain, 直连
+  - RULE-SET,China-Domain, 直连
+  - RULE-SET,China-IP, 直连
+  - RULE-SET,DouYin-Domain, 直连
+  - RULE-SET,GameDownloadCN-Domain, 直连
+  - DOMAIN-SUFFIX,qichiyu.com,国外网站
+  - RULE-SET,Proxylite, 国外网站
+
+  # 游戏平台
+  - RULE-SET,GameDownload-Domain, 游戏平台
+  - RULE-SET,Games-Domain, 游戏平台
+
+  # 海外流媒体
+  - RULE-SET,Netflix-Domain, 海外流媒体
+  - RULE-SET,Disney+-Domain, 海外流媒体
+  - RULE-SET,HBO Max-Domain, 海外流媒体
+  - RULE-SET,Spotify-Domain, 海外流媒体
+  - RULE-SET,Prime Video-Domain, 海外流媒体
+  - RULE-SET,Hulu-Domain, 海外流媒体
+
+  # emby影视
+  - DOMAIN-SUFFIX,xmsl.org, emby影视
+  - DOMAIN-SUFFIX,emby.moe, emby影视
+  - DOMAIN-SUFFIX,xxlb.net, emby影视
+
+  # TikTok
+  - RULE-SET,TikTok-Domain, TikTok
+
+  # YouTube
+  - RULE-SET,YouTube-Domain, YouTube
+
+  # Google
+  - RULE-SET,Google-Domain, Google
+  - RULE-SET,Google@cn-Domain, Google
+
+
+  # 海外社交
+  - RULE-SET,Facebook-Domain, 海外社交
+  - RULE-SET,Instagram-Domain, 海外社交
+  - RULE-SET,Twitter-Domain, 海外社交
+  - RULE-SET,Telegram-Domain, 海外社交
+  - RULE-SET,WhatsApp-Domain, 海外社交
+  - RULE-SET,Line-Domain, 海外社交
+
+  # 海外购物
+  - RULE-SET,Amazon-Domain, 海外购物
+  - RULE-SET,eBay-Domain, 海外购物
+  - RULE-SET,Shopee-Domain, 海外购物
+  - RULE-SET,Rakuten-Domain, 海外购物
+
+  # 智能AI
+  - RULE-SET,AI-Domain, 智能AI
+
+  # GitHub
+  - RULE-SET,GitHub-Domain, GitHub
+
+  # 加密货币
+  - RULE-SET,Crypto-Domain, 加密货币
+
+  # NSFW
+  - RULE-SET,NSFW-Domain, NSFW
+
+  # 微软服务
+  - RULE-SET,Microsoft-Domain, 微软服务
+
+  # Apple 服务
+  - RULE-SET,Apple-Domain, Apple 服务
+
+  # ip直连规则
+  - RULE-SET,Netflix-IP, 海外流媒体
+  - RULE-SET,Apple-IP, 直连
+  - RULE-SET,Telegram-IP, 海外社交
+  - RULE-SET,Google-IP, Google
+
+  # 默认规则（别动顺序）
+  - RULE-SET,Geolocation-!cn, 国外网站
+
+  # 漏网之鱼
+  - MATCH, 漏网之鱼
+ 
+# ========================
+# 规则集提供者
+# ========================
+rule-anchor:
+  ip: &ip { type: http, interval: 86400, behavior: ipcidr, format: mrs }
+  domain: &domain { type: http, interval: 86400, behavior: domain, format: mrs }
+  class: &class { type: http, interval: 86400, behavior: classical, format: text }
+  yaml: &yaml { type: http, interval: 86400, behavior: classical, format: yaml }
+  adblock_tpl: &adblock_tpl { type: http, interval: 86400, behavior: domain, format: yaml }
+
+rule-providers:
+  # 默认规则（勿动）
+  Private-IP: {<<: *ip, url: "https://gh-proxy.com/raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/private.mrs"}
+  Private-Domain: { <<: *domain, url: "https://gh-proxy.com/raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/private.mrs"}
+  Proxylite: { <<: *class, url: "https://gh-proxy.com/raw.githubusercontent.com/qichiyuhub/rule/refs/heads/main/proxy.list"}
+
+  # Adobe服务
+  Adobe-Domain: { <<: *yaml, url: "https://gh-proxy.com/raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Adobe/Adobe.yaml" }
+
+  # 广告拦截
+  AdBlock-Domain: { <<: *adblock_tpl, url: "https://gh-proxy.com/raw.githubusercontent.com/REIJI007/AdBlock_Rule_For_Clash/main/adblock_reject.yaml"}
+
+  # 游戏平台
+  GameDownload-Domain: { <<: *yaml, url: "https://gh-proxy.com/raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Game/GameDownload/GameDownload.yaml" }
+  GameDownloadCN-Domain: { <<: *yaml, url: "https://gh-proxy.com/raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Game/GameDownloadCN/GameDownloadCN.yaml" }
+  Games-Domain: { <<: *domain, url: "https://gh-proxy.com/raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/category-games-!cn.mrs"}
+
+  # 海外流媒体
+  Netflix-Domain: { <<: *domain, url: "https://gh-proxy.com/raw.githubusercontent.com/metacubex/meta-rules-dat/meta/geo/geosite/netflix.mrs" }
+  Netflix-IP: { <<: *ip, url: "https://gh-proxy.com/raw.githubusercontent.com/metacubex/meta-rules-dat/meta/geo/geoip/netflix.mrs" }
+  Disney+-Domain: { <<: *domain, url: "https://gh-proxy.com/raw.githubusercontent.com/metacubex/meta-rules-dat/meta/geo/geosite/disney.mrs" }
+  HBO Max-Domain: { <<: *domain, url: "https://gh-proxy.com/raw.githubusercontent.com/metacubex/meta-rules-dat/meta/geo/geosite/hbo.mrs" }
+  Spotify-Domain: { <<: *domain, url: "https://gh-proxy.com/raw.githubusercontent.com/metacubex/meta-rules-dat/meta/geo/geosite/spotify.mrs" }
+  Prime Video-Domain: { <<: *class, url: "https://gh-proxy.com/raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/PrimeVideo/PrimeVideo.list" }
+  Hulu-Domain: { <<: *class, url: "https://gh-proxy.com/raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Hulu/Hulu.list" }
+
+  # TikTok
+  TikTok-Domain: { <<: *domain, url: "https://gh-proxy.com/raw.githubusercontent.com/metacubex/meta-rules-dat/meta/geo/geosite/tiktok.mrs" }
+  DouYin-Domain: { <<: *yaml, url: "https://gh-proxy.com/raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/DouYin/DouYin.yaml" }
+
+  # YouTube
+  YouTube-Domain: { <<: *domain, url: "https://gh-proxy.com/raw.githubusercontent.com/metacubex/meta-rules-dat/meta/geo/geosite/youtube.mrs" }
+
+  # Google
+  Google-Domain: { <<: *domain, url: "https://gh-proxy.com/raw.githubusercontent.com/metacubex/meta-rules-dat/meta/geo/geosite/google.mrs" }
+  Google-IP: { <<: *ip, url: "https://gh-proxy.com/raw.githubusercontent.com/metacubex/meta-rules-dat/meta/geo/geoip/google.mrs" }
+  Google@cn-Domain: { <<: *domain, url: "https://gh-proxy.com/raw.githubusercontent.com/metacubex/meta-rules-dat/meta/geo/geosite/google@cn.mrs" }
+
+  # 海外社交
+  Facebook-Domain: { <<: *domain, url: "https://gh-proxy.com/raw.githubusercontent.com/metacubex/meta-rules-dat/meta/geo/geosite/facebook.mrs" }
+  Instagram-Domain: { <<: *class, url: "https://gh-proxy.com/raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Instagram/Instagram.list" }
+  Twitter-Domain: { <<: *domain, url: "https://gh-proxy.com/raw.githubusercontent.com/metacubex/meta-rules-dat/meta/geo/geosite/x.mrs" }
+  Telegram-Domain: { <<: *domain, url: "https://gh-proxy.com/raw.githubusercontent.com/metacubex/meta-rules-dat/meta/geo/geosite/telegram.mrs" }
+  Telegram-IP: { <<: *ip, url: "https://gh-proxy.com/raw.githubusercontent.com/metacubex/meta-rules-dat/meta/geo/geoip/telegram.mrs" }
+  WhatsApp-Domain: { <<: *class, url: "https://gh-proxy.com/raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Whatsapp/Whatsapp.list" }
+  Line-Domain: { <<: *class, url: "https://gh-proxy.com/raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Line/Line.list" }
+
+  # 海外购物
+  Amazon-Domain: { <<: *class, url: "https://gh-proxy.com/raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Amazon/Amazon.list" }
+  eBay-Domain: { <<: *class, url: "https://gh-proxy.com/raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/eBay/eBay.list" }
+  Shopee-Domain: { <<: *class, url: "https://gh-proxy.com/raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Shopee/Shopee.list" }
+  Rakuten-Domain: { <<: *class, url: "https://gh-proxy.com/raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Rakuten/Rakuten.list" }
+
+  # 智能AI
+  AI-Domain: { <<: *domain, url: "https://gh-proxy.com/raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/category-ai-!cn.mrs" }
+
+  # GitHub
+  GitHub-Domain: { <<: *domain, url: "https://gh-proxy.com/raw.githubusercontent.com/metacubex/meta-rules-dat/meta/geo/geosite/github.mrs" }
+
+  # 加密货币
+  Crypto-Domain: { <<: *class, url: "https://gh-proxy.com/raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Surge/Crypto/Crypto.list" }
+
+  # NSFW
+  NSFW-Domain: { <<: *yaml, url: "https://gh-proxy.com/raw.githubusercontent.com/clone-fan/openclash-yaml-/main/rule/NSFW.yaml" }
+
+  # 微软服务
+  Microsoft-Domain: { <<: *domain, url: "https://gh-proxy.com/raw.githubusercontent.com/metacubex/meta-rules-dat/meta/geo/geosite/microsoft.mrs" }
+
+  # Apple 服务
+  Apple-Domain: { <<: *domain, url: "https://gh-proxy.com/raw.githubusercontent.com/metacubex/meta-rules-dat/meta/geo/geosite/apple.mrs" }
+  Apple-CN-Domain: { <<: *domain, url: "https://gh-proxy.com/raw.githubusercontent.com/metacubex/meta-rules-dat/meta/geo/geosite/apple-cn.mrs" }
+  Apple-IP: {<<: *ip, url: "https://gh-proxy.com/raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo-lite/geoip/apple.mrs"}
+
+  # 默认规则（别动顺序）
+  Geolocation-!cn: { <<: *domain, url: "https://gh-proxy.com/raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/geolocation-!cn.mrs"}
+  China-Domain: { <<: *domain, url: "https://gh-proxy.com/raw.githubusercontent.com/metacubex/meta-rules-dat/meta/geo/geosite/cn.mrs" }
+  China-IP: { <<: *ip, url: "https://gh-proxy.com/raw.githubusercontent.com/metacubex/meta-rules-dat/meta/geo/geoip/cn.mrs" }
+
